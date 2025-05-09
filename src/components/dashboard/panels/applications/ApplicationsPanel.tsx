@@ -30,7 +30,8 @@ import { ApplicationStatusBadge } from "./ApplicationStatusBadge";
 import { ApplicationActionButton } from "./ApplicationActionButton";
 import { useAccount } from "@/hooks";
 import { AccountRole } from "@/types/account";
-import { approveKYC } from "@/lib/api";
+import { overrideKYC } from "@/lib/api";
+import OverrideKYCButton from "@/components/sign/OverrideKYCButton";
 
 interface ApplicationsPanelProps {
   applications: Application[];
@@ -138,15 +139,14 @@ export function ApplicationsPanel({
                             </Link>
                           </DropdownMenuItem>
                         )}
-                        {application.status === 'KYC_PHASE' && account?.role === AccountRole.GOVERNANCE_TEAM && (
+                        {application.status === 'KYC_PHASE' && (
                           <DropdownMenuItem>
-                            <Button variant="ghost" className="p-0 font-normal" onClick={async () => {
-                            try {
-                              await approveKYC(application.id, account?.address)
-                            } catch (err) {
-                              console.error(err)
-                            }
-                          }}>Approve KYC</Button>
+                            <Link
+                            href="https://flow.togggle.io/fil/kyc"
+                            target="_blank"
+                          >
+                            Submit KYC
+                          </Link>
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>

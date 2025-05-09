@@ -5,8 +5,10 @@ import { useAccount } from "@/hooks/useAccount";
 import { AccountRole } from "@/types/account";
 import SignRkhTransactionButton from "@/components/sign/SignRkhTransactionButton";
 import SignMetaAllocatorTransactionButton from "@/components/sign/SignMetaAllocatorTransactionButton";
+import ApproveGovernanceReviewButton from "@/components/sign/ApproveGovernanceReviewButton";
 import { useState } from "react";
 import { ConnectWalletDialog } from "@/components/connect/ConnectWalletDialog";
+import OverrideKYCButton from "@/components/sign/OverrideKYCButton";
 
 interface ActionConfig {
   label: string;
@@ -18,24 +20,41 @@ interface ActionConfig {
 
 function getActionConfig(application: Application, account?: { role: AccountRole }): ActionConfig {
   const { status, id, githubPrNumber } = application;
+  let label = ""
 
   switch (status) {
     case "SUBMISSION_PHASE":
-    case "GOVERNANCE_REVIEW_PHASE":
       return {
         label: "View",
         href: `${application.githubPrLink}`,
       };
 
-     case "KYC_PHASE":
-      return {
-        label: "Submit KYC",
-        href: `https://flow.togggle.io/fil/kyc`,
-      };
+    case "KYC_PHASE":
+      // If gov team is logged in they can override KYC.
+      // If not, the viewer can submit KYC
+      if (account?.role === AccountRole.GOVERNANCE_TEAM || account?.role === AccountRole.ADMIN) {
+        return {
+          label,
+          component: OverrideKYCButton,
+        };
+      } else {
+        return {
+          label: "Submit KYC",
+          href: `https://flow.togggle.io/fil/kyc`,
+        };
+      }
+
+    case "GOVERNANCE_REVIEW_PHASE":
+      label = `(${application.rkhApprovals?.length ?? 0}/${application.rkhApprovalsThreshold ?? 2}) Approve`;
+      if (account?.role === AccountRole.GOVERNANCE_TEAM || account?.role === AccountRole.ADMIN) {
+        return {
+          label,
+          component: ApproveGovernanceReviewButton,
+        };
+      }
 
     case "RKH_APPROVAL_PHASE":
-      console.log(application);
-      const label = `(${application.rkhApprovals?.length ?? 0}/${application.rkhApprovalsThreshold ?? 2}) Approve`;
+      label = `(${application.rkhApprovals?.length ?? 0}/${application.rkhApprovalsThreshold ?? 2}) Approve`;
       if (account?.role === AccountRole.ROOT_KEY_HOLDER || account?.role === AccountRole.ADMIN) {
         return {
           label,

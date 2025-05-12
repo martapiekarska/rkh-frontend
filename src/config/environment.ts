@@ -12,7 +12,7 @@ const environments: { [key: string]: Environment } = {
   development: {
     apiBaseUrl: "http://localhost:3001/api/v1",
     useTestData: false,
-    rpcUrl: "http://localhost:8010/proxy/rpc/v1",
+    rpcUrl: "https://filecoin.chain.love/rpc/v0",
     rpcToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBbGxvdyI6WyJyZWFkIiwid3JpdGUiLCJzaWduIiwiYWRtaW4iXX0.Dbqn4zlC2cIQ9rJH06OZR1uZ4WUKHTwf2ziaW2RZczA",
     metaAllocatorContractAddress: "0x15a9d9b81e3c67b95ffedfb4416d25a113c8c6df",
   },

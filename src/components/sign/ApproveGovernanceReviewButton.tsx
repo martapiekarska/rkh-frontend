@@ -30,7 +30,7 @@ export default function ApproveGovernanceReviewButton({ application }: ApproveGo
     const { account } = useAccount();
     const { toast } = useToast();
     const [ realDataCap, setRealDataCap ] = useState(application.datacap);
-    const [ allocatorType, setAllocatorType ] = useState("Manual");
+    const [ allocatorType, setAllocatorType ] = useState("Automated");
     const [ approvalSecret, setApprovalSecret ] = useState("");
     const [ rejectReason, setRejectReason ] = useState("No reason given");
 

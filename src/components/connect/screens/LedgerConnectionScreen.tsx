@@ -8,6 +8,7 @@ import { LedgerConnector } from "@/lib/connectors/ledger-connector";
 
 interface LedgerAccount {
     address: string;
+    pubKey: Buffer;
     path: string;
     index: number;
 }

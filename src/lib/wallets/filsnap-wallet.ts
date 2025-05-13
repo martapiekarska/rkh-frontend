@@ -32,6 +32,10 @@ export class FilsnapWallet implements Wallet {
         return result.signature.data;
     }
 
+    async signArbitrary(message: string, indexAccount: number): Promise<string> {
+        throw new Error("signArbitrary is not implemented for FilsnapWallet");
+    }
+
     async getAccounts(): Promise<string[]> {
         const { error, result: address } = await this.adapter.getAddress();
         if (error) {
@@ -39,5 +43,9 @@ export class FilsnapWallet implements Wallet {
         }
         // Filsnap currently supports only one account per connection
         return [address];
+    }
+
+    getPubKey(): Buffer {
+        throw new Error("getPubKey is not implemented for FilsnapWallet");
     }
 }

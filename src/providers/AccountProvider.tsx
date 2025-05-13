@@ -52,6 +52,8 @@ export const AccountProvider: React.FC<{
             wallet: {
               type: "metamask",
               sign: async (_message: any, _indexAccount: number) => "0x00",
+              signArbitrary: async (message: string, indexAccount: number) => { throw new Error("Not implemented") },
+              getPubKey: () => { throw new Error("Not implemented") },
               getAccounts: async () => {
                 return [wagmiAddress];
               }
@@ -181,6 +183,18 @@ export const AccountProvider: React.FC<{
     return messageId;
   }, [account]);
   
+  const signStateMessage = useCallback(async (message: string) => {
+    if (!account?.wallet) {
+      throw new Error("Wallet not connected");
+    }
+
+    const signature = await account?.wallet.signArbitrary(
+        message,
+        account.index || 0
+    )
+
+    return signature;
+  }, [account, currentConnector]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -190,6 +204,7 @@ export const AccountProvider: React.FC<{
           connect,
           disconnect,
           connectors,
+          signStateMessage,
           proposeAddVerifier,
           acceptVerifierProposal,
           loadPersistedAccount,

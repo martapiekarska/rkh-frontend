@@ -38,14 +38,14 @@ export class LedgerConnector implements Connector {
       }
 
       const path = `m/44'/461'/0'/0/${this.accountIndex}`;
-      const { addrString: address } = await this.filecoinApp.getAddressAndPubKey(path);
+      const { addrString: address, compressed_pk: pubkey } = await this.filecoinApp.getAddressAndPubKey(path);
 
       const role = await fetchRole(address);
       this.account = {
         index: this.accountIndex,
         address,
         isConnected: true,
-        wallet: new LedgerWallet(this.filecoinApp, address),
+        wallet: new LedgerWallet(this.filecoinApp, address, pubkey),
         role,
       };
       this.connected = true;
@@ -78,8 +78,8 @@ export class LedgerConnector implements Connector {
     const accounts: LedgerAccount[] = [];
     for (let i = 0; i < 10; i++) {
       const path = `m/44'/461'/0'/0/${i}`;
-      const { addrString } = await this.filecoinApp.getAddressAndPubKey(path);
-      accounts.push({ address: addrString, index: i, path });
+      const apk = await this.filecoinApp.getAddressAndPubKey(path);
+      accounts.push({ address: apk.addrString, pubKey: apk.compressed_pk, index: i, path });
     }
     return accounts;
   }
@@ -87,6 +87,7 @@ export class LedgerConnector implements Connector {
 
 interface LedgerAccount {
   address: string;
+  pubKey: Buffer;
   path: string;
   index: number;
 }

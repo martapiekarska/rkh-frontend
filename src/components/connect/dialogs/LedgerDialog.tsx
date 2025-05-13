@@ -11,7 +11,6 @@ interface LedgerDialogProps {
 
 interface LedgerAccount {
   address: string;
-  pubKey: Buffer;
   path: string;
   index: number;
 }

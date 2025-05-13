@@ -26,10 +26,12 @@ interface ApproveGovernanceReviewButtonProps {
 
 export default function ApproveGovernanceReviewButton({ application }: ApproveGovernanceReviewButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const { account, signStateMessage } = useAccount();
+    
+    const { account } = useAccount();
     const { toast } = useToast();
     const [ realDataCap, setRealDataCap ] = useState(application.datacap);
     const [ allocatorType, setAllocatorType ] = useState("Automated");
+    const [ approvalSecret, setApprovalSecret ] = useState("");
     const [ rejectReason, setRejectReason ] = useState("No reason given");
 
     const { writeContract, isPending, error: isError, data: hash, reset } = useWriteContract();
@@ -63,26 +65,28 @@ export default function ApproveGovernanceReviewButton({ application }: ApproveGo
     }, [isError, isConfirming]);
 
     const submitReview = async (approved: boolean) => {
-        const resultStr = approved ? "approved" : "rejected";
-        const signature = await signStateMessage(
-            `Governance Review ${application.id} ${resultStr}`
-        )
-        const pubKey = account?.wallet?.getPubKey() || Buffer.from("0x0000000000000000000000000000000000000000")
-        const safePubKey = pubKey?.toString('base64')
+        let data = {}
 
-        const data = {
-          result: resultStr,
-          details: {
-            finalDataCap: realDataCap,
-            allocatorType: allocatorType,
-            reason: rejectReason || "No reason given",
-            reviewerAddress: account?.address || "0x0000000000000000000000000000000000000000",
-            reviewerPublicKey: safePubKey
-          },
-          signature: signature,
+        if (approved) {
+            data = {
+              result: "approved",
+              details: {
+                finalDataCap: realDataCap,
+                allocatorType: allocatorType,
+                reviewerAddress: account?.address || "0x0000000000000000000000000000000000000000"
+              }
+            }
+        } else {
+          data = {
+            result: "rejected",
+            details: {
+              reason: rejectReason,
+              reviewerAddress: account?.address || "0x0000000000000000000000000000000000000000"
+            }
+          }
         }
 
-        governanceReview(application.id, data)
+        governanceReview(application.id, approvalSecret, data)
     }
 
     const approveReview = async () => {
@@ -115,12 +119,9 @@ export default function ApproveGovernanceReviewButton({ application }: ApproveGo
                     {isConfirmed && <p>Transaction confirmed!</p>}
 
                     {!isPending && (
-                      <div className="flex justify-center flex-col gap-2">
+                      <div className="flex justify-center">
                         <Label>
-                          {`Approving ${application.name} for ${realDataCap} PiBs.`}
-                        </Label>
-                        <Label>
-                          {"Please confirm your Ledger is still connected then confirm PiB amount and allocator type to approve."}
+                          {`Approving ${application.name} for ${realDataCap} PiBs.\n\nConfirm PiB amount and allocator type then enter your secret to approve.`}
                         </Label>
                       </div>
                     )}
@@ -145,6 +146,15 @@ export default function ApproveGovernanceReviewButton({ application }: ApproveGo
                     <option value="Market Based">Market Based</option>
                     <option value="Manual">Manual</option>
                   </SimpleSelect>
+                </div>
+
+                <div className="flex justify-center">
+                <Input
+                      type="password"
+                      className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                      placeholder="secret"
+                      onChange={(e) => setApprovalSecret(e.target.value)}
+                    />
                 </div>
 
                 <div className="flex justify-center gap-2">

@@ -26,7 +26,7 @@ interface OverrideKYCButtonProps {
 export default function OverrideKYCButton({ application }: OverrideKYCButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     
-    const { account, signStateMessage } = useAccount();
+    const { account } = useAccount();
     const { toast } = useToast();
     const [ approvalSecret, setApprovalSecret ] = useState("");
     const [ overrideReason, setOverrideReason ] = useState("No reason given");
@@ -62,21 +62,14 @@ export default function OverrideKYCButton({ application }: OverrideKYCButtonProp
     }, [isError, isConfirming]);
 
     const submitOverride = async () => {
+        let data = {}
 
-        const signature = await signStateMessage(
-            `KYC Override for ${application.id}`
-        )
-        const pubKey = account?.wallet?.getPubKey() || Buffer.from("0x0000000000000000000000000000000000000000")
-        const safePubKey = pubKey?.toString('base64')
-
-        const data = {
-          reason: overrideReason || "No reason given",
-          reviewerAddress: account?.address || "0x0000000000000000000000000000000000000000",
-          reviewerPublicKey: safePubKey,
-          signature: signature,
+        data = {
+          reason: overrideReason,
+          reviewerAddress: account?.address || "0x0000000000000000000000000000000000000000"
         }
 
-        overrideKYC(application.id, data)
+        overrideKYC(application.id, approvalSecret, data)
     }
 
     return (
@@ -101,12 +94,9 @@ export default function OverrideKYCButton({ application }: OverrideKYCButtonProp
                     {isConfirmed && <p>Transaction confirmed!</p>}
 
                     {!isPending && (
-                      <div className="flex justify-center flex-col gap-2">
+                      <div className="flex justify-center">
                         <Label>
-                          {`Overriding KYC for ${application.name} for ${application.datacap} PiBs.`}
-                        </Label>
-                        <Label>
-                          {"Please confirm your Ledger is still connected then confirm PiB amount and allocator type to approve."}
+                          {`Overriding KYC for ${application.name} for ${application.datacap} PiBs. Enter your secret to approve.`}
                         </Label>
                       </div>
                     )}
@@ -120,7 +110,15 @@ export default function OverrideKYCButton({ application }: OverrideKYCButtonProp
                           className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
                           placeholder="Give a short reason"
                           onChange={(e) => setOverrideReason(e.target.value)}
-                      />
+                        />
+                    </div>
+                    <div className="flex center-items justify-center">
+                      <Input
+                          type="password"
+                          className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[320px]"
+                          placeholder="secret"
+                          onChange={(e) => setApprovalSecret(e.target.value)}
+                        />
                   </div>
                 </div>
 

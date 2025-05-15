@@ -49,7 +49,7 @@ function getActionConfig(application: Application, account?: { role: AccountRole
       } else {
         return {
           label: "Submit KYC",
-          href: `https://flow.togggle.io/fil/kyc`,
+          href: `https://verify.zyphe.com/flow/fil-kyc/kyc/kyc?applicationId=${application.id}`,
         };
       }
 

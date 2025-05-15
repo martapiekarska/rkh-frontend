@@ -142,7 +142,7 @@ export function ApplicationsPanel({
                         {application.status === 'KYC_PHASE' && (
                           <DropdownMenuItem>
                             <Link
-                            href="https://flow.togggle.io/fil/kyc"
+                            href={`https://verify.zyphe.com/flow/fil-kyc/kyc/kyc?applicationId=${application.id}`}
                             target="_blank"
                           >
                             Submit KYC

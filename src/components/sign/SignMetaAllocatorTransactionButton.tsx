@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import { ExternalLink } from "lucide-react";
 import { useWriteContract, useWaitForTransactionReceipt, useAccount as useAccountWagmi, useSwitchChain } from "wagmi";
+import { useFilecoinPublicClient } from "@/hooks/use-filecoin-public-client";
 import Safe, { Eip1193Provider } from '@safe-global/protocol-kit'
 import {
   MetaTransactionData,
@@ -29,8 +30,10 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useAccount } from "@/hooks";
 import { Application } from "@/types/application";
+import { isFilecoinAddress } from "@/types/filecoin";
 import { env } from "@/config/environment";
 import { encodeFunctionData } from "viem/utils";
+
 
 const contractAbi = [{
     "type": "function",
@@ -61,6 +64,7 @@ export default function SignMetaAllocatorTransactionButton({ application }: Sign
     const { account } = useAccount();
     const { toast } = useToast();
     const { connector } = useAccountWagmi();
+    const client = useFilecoinPublicClient();
     const { chains, switchChain } = useSwitchChain()
 
     const { writeContract, isPending, error: isError, data: hash, reset } = useWriteContract();
@@ -94,13 +98,14 @@ export default function SignMetaAllocatorTransactionButton({ application }: Sign
     }, [isError, isConfirming]);
 
     const addVerifier = async (verifierAddress: string, datacap: number) => {
+        const fullDataCap = BigInt(datacap * 1000000000000);
         writeContract({
             address: env.metaAllocatorContractAddress as `0x${string}`,
             abi: contractAbi,
             functionName: "addAllowance",
             args: [
                 verifierAddress as `0x${string}`,
-                BigInt(datacap)
+                fullDataCap
             ],
         });
     };
@@ -116,20 +121,52 @@ export default function SignMetaAllocatorTransactionButton({ application }: Sign
         const safeAddress = "0x2e25A2f6bC2C0b7669DFB25180Ed57e07dAabe9e"
 
         const provider = await connector?.getProvider();
+
         const safeKit = await Safe.init({
             provider: provider as Eip1193Provider,
             safeAddress: safeAddress
         })
 
+        let txAddress = application.address;
+
+        if (isFilecoinAddress(txAddress)) {
+            try {
+                const converted = await client?.request({
+                    method: "Filecoin.FilecoinAddressToEthAddress",
+                    params: [txAddress],
+                })
+                txAddress = converted as `0x${string}`;
+
+            } catch (error) {
+                toast({
+                    title: "Submission Failed",
+                    description:
+                      error instanceof Error
+                        ? error.message
+                        : "An unknown error occurred whilst converting to Ethereum address.",
+                    variant: "destructive",
+                  });
+            }
+        }
+
+        // Now should be a proper Ethereum address one way or another
+        if ( txAddress.length != 42 || !(txAddress.startsWith('0x')) ) {
+            toast({
+                title: "Submission Failed",
+                description: "Could not convert to Ethereum address.",
+                variant: "destructive",
+              });
+        }
+
+        const fullDataCap = BigInt(application.datacap * 1000000000000);
         const data = encodeFunctionData({
             abi: contractAbi,
             functionName: 'addAllowance',
             args: [
-                application.address as `0x${string}`,
-                BigInt(application.datacap)
+                txAddress as `0x${string}`,
+                fullDataCap
             ],
           })
-        console.log(data)
 
         const safeTransactionData: MetaTransactionData = {
             to: env.metaAllocatorContractAddress as `0x${string}`,
@@ -137,18 +174,14 @@ export default function SignMetaAllocatorTransactionButton({ application }: Sign
             data: data,
             operation: OperationType.Call
         }
-        console.log(safeTransactionData)
 
         const safeTransaction = await safeKit.createTransaction({
             transactions: [safeTransactionData]
         })
-        console.log(safeTransaction)
 
         const signedSafeTransaction = await safeKit.signTransaction(safeTransaction)
-        console.log(signedSafeTransaction)
 
         const executeTxResponse = await safeKit.executeTransaction(signedSafeTransaction)
-        console.log(executeTxResponse.hash)
     }
 
     return (

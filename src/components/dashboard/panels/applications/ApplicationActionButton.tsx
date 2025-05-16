@@ -59,6 +59,11 @@ function getActionConfig(application: Application, account?: { role: AccountRole
           label,
           component: ApproveGovernanceReviewButton,
         };
+      } else {
+        return {
+          label: "Connect Wallet",
+          connectWallet: true,
+        } as ActionConfig & { connectWallet: true };
       }
 
     case "RKH_APPROVAL_PHASE":
@@ -68,14 +73,24 @@ function getActionConfig(application: Application, account?: { role: AccountRole
           label,
           component: SignRkhTransactionButton,
         };
+      } else {
+        return {
+          label: "Connect Wallet",
+          connectWallet: true,
+        } as ActionConfig & { connectWallet: true };
       }
 
     case "META_APPROVAL_PHASE":
-        if (account?.role === AccountRole.ROOT_KEY_HOLDER || account?.role === AccountRole.ADMIN) {
+        if (account?.role === AccountRole.METADATA_ALLOCATOR || account?.role === AccountRole.ADMIN) {
           return {
             label: "Approve",
             component: SignMetaAllocatorTransactionButton,
           };
+        } else {
+          return {
+            label: "Connect Wallet",
+            connectWallet: true,
+          } as ActionConfig & { connectWallet: true };
         }
        
     default:

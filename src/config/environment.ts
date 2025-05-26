@@ -16,7 +16,7 @@ const environments: { [key: string]: Environment } = {
     useTestnet: false,
     rpcUrl: "https://api.node.glif.io/rpc/v1",
     rpcToken: process.env.RPC_TOKEN || "",
-    metaAllocatorContractAddress: "0x15a9d9b81e3c67b95ffedfb4416d25a113c8c6df",
+    metaAllocatorContractAddress: "0xB6F5d279AEad97dFA45209F3E53969c2EF43C21d",
   },
   staging: {
     apiBaseUrl: "https://allocator-rkh-backend-utcn6.ondigitalocean.app/api/v1",
@@ -24,7 +24,7 @@ const environments: { [key: string]: Environment } = {
     useTestnet: false,
     rpcUrl: "https://api.node.glif.io/rpc/v1",
     rpcToken: process.env.RPC_TOKEN || "",
-    metaAllocatorContractAddress: "0x386f08f6E8E4647B871415EBFB858b1e377d9ab2",
+    metaAllocatorContractAddress: "0xB6F5d279AEad97dFA45209F3E53969c2EF43C21d",
   },
   production: {
     apiBaseUrl: "https://allocator-rkh-backend-utcn6.ondigitalocean.app/backend/api/v1",
@@ -32,7 +32,7 @@ const environments: { [key: string]: Environment } = {
     useTestnet: false,
     rpcUrl: "https://api.node.glif.io/rpc/v1",
     rpcToken: process.env.RPC_TOKEN || "",
-    metaAllocatorContractAddress: "0x386f08f6E8E4647B871415EBFB858b1e377d9ab2",
+    metaAllocatorContractAddress: "0xB6F5d279AEad97dFA45209F3E53969c2EF43C21d",
   },
 };
 
